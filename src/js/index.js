@@ -34,40 +34,38 @@ form.addEventListener('submit', (e) => {
         list.innerHTML = '';
     }
 
-    setTimeout(() => {
-        getImg()
-            .then(data => {
-                totalResult = data.totalHits;
-                render(data.hits);
-                lightbox.refresh();
-                if (data.hits.length === 0) {
-                    iziToast.error({
-                        message: 'Sorry, there are no images matching your search query. Please try again!',
-                        position: 'topRight',
-                        backgroundColor: 'red',
-                        messageColor: 'white',
-                    });
-                    loadBtn.disabled = true;
-                    loadBtn.style.display = 'none'
-                    loadBtn.style.opacity = 0;
-                    loadBtn.style.overflow = 'hidden';
-                } else {
-                    loadBtn.disabled = false;
-                    loadBtn.style.display = 'flex';
-                    loadBtn.style.opacity = 1;
-                    loadBtn.style.overflow = 'visible';
-                }
-
-                if (data.hits.length < perPage) {
-                    loadBtn.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Помилка отримання зображень:', error);
-            })
-            .finally(() => {
-                loader.style.display = 'none';
+    setTimeout(async () => {
+    try {
+        const data = await getImg();
+        totalResult = data.totalHits;
+        render(data.hits);
+        lightbox.refresh();
+        if (data.hits.length === 0) {
+            iziToast.error({
+                message: 'Sorry, there are no images matching your search query. Please try again!',
+                position: 'topRight',
+                backgroundColor: 'red',
+                messageColor: 'white',
             });
+            loadBtn.disabled = true;
+            loadBtn.style.display = 'none'
+            loadBtn.style.opacity = 0;
+            loadBtn.style.overflow = 'hidden';
+        } else {
+            loadBtn.disabled = false;
+            loadBtn.style.display = 'flex';
+            loadBtn.style.opacity = 1;
+            loadBtn.style.overflow = 'visible';
+        }
+
+        if (data.hits.length < perPage) {
+            loadBtn.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Помилка отримання зображень:', error);
+    } finally {
+        loader.style.display = 'none';
+            }
     }, 500);
     btnChange();
     e.target.reset();
@@ -77,21 +75,26 @@ let page = 1;
 let perPage = 15;
 
 loadBtn.addEventListener('click', async () => {
-    page += 1;
-    const data = await getImg();
-    render(data.hits);
-    lightbox.refresh();
-    btnChange();
-    
-    const galleryCards = document.querySelectorAll('.gallery-card');
-    galleryCards.forEach(card => {
-        const cardSize = card.getBoundingClientRect();
-        window.scrollBy({
-            top: cardSize.height * 1.36,
-            behavior: "smooth",
+    try {
+        page += 1;
+        const data = await getImg();
+        render(data.hits);
+        lightbox.refresh();
+        btnChange();
+
+        const galleryCards = document.querySelectorAll('.gallery-card');
+        galleryCards.forEach(card => {
+            const cardSize = card.getBoundingClientRect();
+            window.scrollBy({
+                top: cardSize.height * 1.36,
+                behavior: "smooth",
+            });
         });
-    });
+    } catch (error) {
+        console.error('Помилка під час завантаження додаткових зображень:', error);
+    }
 });
+
 
 
 
