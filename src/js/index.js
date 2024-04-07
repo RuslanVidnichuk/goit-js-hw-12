@@ -57,9 +57,10 @@ form.addEventListener('submit', (e) => {
                     loadBtn.style.opacity = 1;
                     loadBtn.style.overflow = 'visible';
                 }
-                
-                
-                
+
+                if (data.hits.length < perPage) {
+                    loadBtn.style.display = 'none';
+                }
             })
             .catch(error => {
                 console.error('Помилка отримання зображень:', error);
@@ -107,10 +108,16 @@ async function getImg() {
         orientation: 'horizontal',
         safesearch: true,
     });
-    
-    const response = await axios.get(`https://pixabay.com/api/?${params}`);
-    return response.data;
+
+    try {
+        const response = await axios.get(`https://pixabay.com/api/?${params}`);
+        return response.data;
+    } catch (error) {
+        console.error('Помилка отримання зображень:', error);
+        throw error;
+    }
 }
+
 
 function btnChange() {
     const maxPage = Math.ceil(totalResult / perPage);
